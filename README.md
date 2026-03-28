@@ -1,6 +1,6 @@
-Binance Futures Trading Bot (Testnet)
+###Binance Futures Trading Bot (Testnet)
 
-Overview
+##Overview
 
 This project is a simplified trading bot built in Python that interacts with the Binance Futures Testnet (USDT-M). It allows users to place MARKET and LIMIT orders through a command-line interface (CLI) with proper validation, logging, and structured code design.
 
