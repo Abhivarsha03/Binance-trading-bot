@@ -1,80 +1,22 @@
-# Binance Futures Testnet — Trading Bot
+Binance Futures Trading Bot (Testnet)
 
-A small CLI tool to place orders on Binance Futures Testnet (USDT-M). Supports Market, Limit, and Stop-Market orders with structured logging and input validation.
+Overview
 
----
+This project is a simplified trading bot built in Python that interacts with the Binance Futures Testnet (USDT-M). It allows users to place MARKET and LIMIT orders through a command-line interface (CLI) with proper validation, logging, and structured code design.
 
-## Setup
-
-**1. Clone and install dependencies**
-```bash
-git clone <your-repo-url>
-cd trading_bot
-pip install -r requirements.txt
-```
-
-**2. Get your API credentials**
-
-- Register at [testnet.binancefuture.com](https://testnet.binancefuture.com)
-- Go to API Management → Generate API key & secret
-
-**3. Export credentials as environment variables**
-```bash
-export BINANCE_API_KEY=your_api_key_here
-export BINANCE_API_SECRET=your_api_secret_here
-```
-
-> On Windows (cmd): use `set` instead of `export`
+The goal of this project is to demonstrate clean architecture, API integration, and robust error handling in a real-world trading scenario.
 
 ---
 
-## How to Run
+## Features
 
-### Market Order
-```bash
-python cli.py --symbol BTCUSDT --side BUY --type MARKET --quantity 0.01
-```
-
-### Limit Order
-```bash
-python cli.py --symbol ETHUSDT --side SELL --type LIMIT --quantity 0.1 --price 3450
-```
-
-### Stop-Market Order (Bonus)
-```bash
-python cli.py --symbol BTCUSDT --side SELL --type STOP_MARKET --quantity 0.01 --stop-price 65000
-```
-
-### More verbose console output
-```bash
-python cli.py --symbol BTCUSDT --side BUY --type MARKET --quantity 0.01 --log-level DEBUG
-```
-
----
-
-## Example Output
-
-```
-────────────────────────────────────────────
-  ORDER REQUEST
-────────────────────────────────────────────
-  Symbol    : BTCUSDT
-  Side      : BUY
-  Type      : MARKET
-  Quantity  : 0.01
-────────────────────────────────────────────
-  ORDER RESPONSE
-────────────────────────────────────────────
-  Order ID  : 3921748302
-  Status    : FILLED
-  Exec Qty  : 0.010
-  Avg Price : 67843.20
-  Client OID: web_xKp3RnmT7Qv21oYzF8Ls
-────────────────────────────────────────────
-  ✓ Order placed successfully!
-
-  Log saved to: logs/trading_bot_2025-06-04.log
-```
+* Place **MARKET** and **LIMIT** orders
+* Supports both **BUY** and **SELL** operations
+* Command-line interface using argparse
+* Input validation with clear error messages
+* Structured codebase (separation of concerns)
+* Logging of API requests, responses, and errors
+* Works with Binance Futures **Testnet** (safe for testing)
 
 ---
 
@@ -82,40 +24,146 @@ python cli.py --symbol BTCUSDT --side BUY --type MARKET --quantity 0.01 --log-le
 
 ```
 trading_bot/
+│
 ├── bot/
-│   ├── __init__.py
-│   ├── client.py          # Binance REST client (signing, HTTP)
-│   ├── orders.py          # order placement + output formatting
-│   ├── validators.py      # input validation, decoupled from CLI
-│   └── logging_config.py  # file + console logging setup
-├── cli.py                 # CLI entry point (argparse)
-├── logs/                  # auto-created on first run
+│   ├── client.py        # Binance API client
+│   ├── orders.py        # Order execution logic
+│   ├── validators.py    # Input validation
+│   ├── logger.py        # Logging configuration
+│
+├── cli.py               # CLI entry point
 ├── requirements.txt
-└── README.md
+├── README.md
+```
+
+---
+
+## Setup Instructions
+
+### 1. Clone the repository
+
+```
+git clone https://github.com/Abhivarsha03/Binance-trading-bot.git
+cd Binance-trading-bot
+```
+
+### 2. Install dependencies
+
+```
+pip install -r requirements.txt
+```
+
+### 3. Configure API credentials
+
+Create a `.env` file in the root directory:
+
+```
+API_KEY=your_testnet_api_key
+API_SECRET=your_testnet_secret_key
+```
+
+Make sure you are using **Binance Futures Testnet credentials**, not live keys.
+
+---
+
+## Usage
+
+### MARKET Order Example
+
+```
+python cli.py --symbol BTCUSDT --side BUY --type MARKET --quantity 0.001
+```
+
+### LIMIT Order Example
+
+```
+python cli.py --symbol BTCUSDT --side SELL --type LIMIT --quantity 0.001 --price 60000
+```
+
+---
+
+## Sample Output
+
+```
+=== ORDER SUMMARY ===
+Symbol: BTCUSDT
+Side: BUY
+Type: MARKET
+Quantity: 0.001
+
+=== RESPONSE ===
+Order ID: 12345678
+Status: FILLED
+Executed Quantity: 0.001
+Average Price: 59850.12
 ```
 
 ---
 
 ## Logging
 
-Logs are written to `logs/trading_bot_YYYY-MM-DD.log` automatically. Each file contains:
-- All API request parameters (minus the signature)
-- Full API responses
-- Validation errors and network failures
+All API interactions and errors are logged to a file:
 
-Console output is INFO-level by default to avoid noise. Use `--log-level DEBUG` to see request/response details in the terminal too.
+```
+trading_bot.log
+```
+
+Logs include:
+
+* Request parameters
+* API responses
+* Error messages
+
+### Example Log Entry
+
+```
+INFO - Sending order: {'symbol': 'BTCUSDT', 'side': 'BUY', ...}
+INFO - Response: {'orderId': 12345678, 'status': 'FILLED'}
+ERROR - API error: Invalid quantity
+```
+
+---
+
+## Validation
+
+The application validates:
+
+* Order side (BUY/SELL)
+* Order type (MARKET/LIMIT)
+* Quantity (> 0)
+* Price requirement for LIMIT orders
+
+Clear error messages are provided for invalid inputs.
 
 ---
 
 ## Assumptions
 
-- Only USDT-M futures are supported (testnet URL is hardcoded to `https://testnet.binancefuture.com`)
-- `timeInForce` defaults to `GTC` for Limit orders — didn't add a flag for it since GTC is the sensible default for most use cases
-- Quantity precision isn't validated client-side; Binance will reject with a clear error if the precision is wrong for the symbol
-- Credentials are expected via environment variables rather than a config file to avoid accidentally committing secrets
+* Only USDT-M Futures Testnet is used
+* User provides valid trading symbols (e.g., BTCUSDT)
+* Internet connection is stable for API calls
 
 ---
 
-## Dependencies
+## Notes
 
-- `requests` — HTTP client for REST calls. Chose this over `python-binance` to keep the dependency footprint minimal and make the API interaction transparent.
+* This project is intended for **testing and demonstration purposes only**
+* It does not include advanced trading strategies or risk management
+* Do NOT use real API keys
+
+---
+
+## Future Improvements
+
+* Add Stop-Limit or OCO order support
+* Improve CLI UX with interactive prompts
+* Add retry mechanism for API failures
+* Extend logging with structured formats (JSON)
+
+---
+
+## Author
+
+Developed as part of a Python Developer Internship assignment.
+
+---
