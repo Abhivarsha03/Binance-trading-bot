@@ -164,6 +164,6 @@ Clear error messages are provided for invalid inputs.
 
 ## Author
 
-Developed as part of a Python Developer Internship assignment.
+Developed as part of a AI Agent Development Internship/Job assignment.
 
 ---
